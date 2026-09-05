@@ -26,10 +26,26 @@ llm-pi-ai:
       api: anthropic-messages
       baseURL: http://127.0.0.1:8765
       apiKeyEnv: AGENTROUTER_API_KEY
+      retryPolicy:
+        mode: normal
+        maxRetries: 8
+        retryableCodes:
+          - EMPTY_RESPONSE
+          - RATE_LIMIT
+          - SERVER
+          - TIMEOUT
+          - TRANSPORT
+          - PI_AI_ERROR
       models:
         - id: glm-5.3
           name: GLM 5.3
 ```
+
+The `retryPolicy` matters: AgentRouter sometimes returns
+`500 {"error":{"message":"Upstream rejected the request as invalid",...}}` for
+transient upstream hiccups. `dsh` classifies that text as `PI_AI_ERROR`, which
+is *not* in the default retryable-code list — without the policy above the
+turn fails immediately instead of retrying.
 
 `~/.dsh/.credentials.yaml` (add your real key; never commit it):
 
