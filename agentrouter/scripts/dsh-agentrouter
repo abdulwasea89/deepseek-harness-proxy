@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Launch AgentRouter proxy (if needed) + DeepSeek Hermes web UI (macOS/Linux).
+set -euo pipefail
+
+NODE="${NODE:-$(command -v node || true)}"
+[ -n "$NODE" ] || NODE="/home/$USER/.nvm/versions/node/v25.6.1/bin/node"
+PROXY="/home/$USER/.dsh/bin/agentrouter-proxy.mjs"
+PORT="${DSH_AGENTROUTER_PROXY_PORT:-8765}"
+PROXY_PID=""
+
+cleanup() {
+  if [[ -n "$PROXY_PID" ]] && kill -0 "$PROXY_PID" 2>/dev/null; then
+    kill "$PROXY_PID" 2>/dev/null || true
+    wait "$PROXY_PID" 2>/dev/null || true
+  fi
+}
+trap cleanup EXIT INT TERM
+
+port_open() { (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2>/dev/null && { exec 3>&- 3<&-; return 0; } || return 1; }
+
+if ! port_open; then
+  "$NODE" "$PROXY" &
+  PROXY_PID=$!
+  for _ in $(seq 1 50); do
+    port_open && break
+    sleep 0.1
+  done
+  if ! port_open; then
+    echo "agentrouter-proxy failed to start on port $PORT" >&2
+    exit 1
+  fi
+else
+  echo "agentrouter-proxy already running on port $PORT" >&2
+fi
+
+exec npx @deepseek-ai/dsh web "$@"

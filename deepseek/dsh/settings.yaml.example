@@ -1,0 +1,11 @@
+# ~/.dsh/settings.yaml — DeepSeek Official as the default route
+# The deepseek-official route itself is served by the built-in dsh-llm-deepseek
+# adapter and needs no llm-pi-ai entry.
+
+agent-default-model:
+  provider: deepseek-official
+  model: deepseek-v4-flash
+  reasoningEffort: low
+
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1

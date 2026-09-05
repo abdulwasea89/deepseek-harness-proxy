@@ -1,0 +1,21 @@
+# ~/.dsh/settings.yaml — llm-pi-ai providers section for AgentRouter
+# Copy the `providers.agentrouter` block into your existing settings.yaml,
+# or replace the whole file if dsh is not configured yet.
+
+llm-pi-ai:
+  providers:
+    agentrouter:
+      displayName: AgentRouter
+      api: anthropic-messages
+      baseURL: http://127.0.0.1:8765
+      apiKeyEnv: AGENTROUTER_API_KEY
+      models:
+        - id: glm-5.3
+          name: GLM 5.3
+
+agent-default-model:
+  provider: agentrouter
+  model: glm-5.3
+
+ui-onboarding:
+  welcomeNoticeVersion: 2026-08-13.1
